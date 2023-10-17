@@ -8,14 +8,15 @@ namespace Internal.Bow.Trajectory.CodeBase
         [SerializeField] GameObject dotsParent;
         [SerializeField] GameObject dotPrefab;
         [SerializeField] float dotSpacing;
-        [SerializeField] [Range (0.01f, 0.3f)] float dotMinScale;
-        [SerializeField] [Range (0.3f, 1f)] float dotMaxScale;
+        [SerializeField] [Range (0.01f, 0.1f)] float dotMinScale;
+        [SerializeField] [Range (0.1f, 1f)] float dotMaxScale;
 
         Transform[] dotsList;
 
         Vector2 pos;
         //dot pos
         float timeStamp;
+        private float alpha = 1;
 
         //--------------------------------
         void Start ()
@@ -41,6 +42,7 @@ namespace Internal.Bow.Trajectory.CodeBase
                 dotsList [i].localScale = Vector3.one * scale;
                 if (scale > dotMinScale)
                     scale -= scaleFactor;
+                dotsList[i].GetComponent<SpriteRenderer>().color = new Color(1,1,1,alpha -= 0.02f);
             }
         }
 

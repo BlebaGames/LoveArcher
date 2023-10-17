@@ -1,5 +1,6 @@
 using System;
 using Internal.Arrow.CodeBase.ArrowRotation;
+using Internal.Factories.ArrowFactory;
 using UnityEngine;
 using Zenject;
 
@@ -24,19 +25,24 @@ namespace Internal.Bow.CodeBase
         [SerializeField] private GameObject player;
         [SerializeField] private float rotationSpeed;
         [SerializeField] private SpriteRenderer playerSpriteRenderer;
+        
+        private const string ArrowPath = "Arrow/Arrow";
+        
+        private ArrowFactory arrowFactory = new();
+        [SerializeField] private float maxDistance;
+        [SerializeField] private float minDistance;
         public event Action OnRotate;
 
         [Inject]
-        private void Construct(Trajectory.CodeBase.Trajectory trajectory, ArrowMovement arrowMovement)
+        private void Construct(Trajectory.CodeBase.Trajectory trajectory)
         {
             this.trajectory = trajectory;
-            arrow = arrowMovement;
         }
 
         private void Start ()
         {
             cam = Camera.main;
-            arrow.DisactivateRigidBody(); 
+            //arrow = arrowFactory.CreateArrow();
         }
 
         private void Update ()
@@ -58,6 +64,7 @@ namespace Internal.Bow.CodeBase
         //-Drag--------------------------------------
         private void OnDragStart ()
         {
+            arrow = arrowFactory.CreateArrow(transform);
             arrow.DisactivateRigidBody();
             startPoint = cam.ScreenToWorldPoint (Input.mousePosition);
 
@@ -68,6 +75,10 @@ namespace Internal.Bow.CodeBase
         {
             endPoint = cam.ScreenToWorldPoint (Input.mousePosition);
             distance = Vector2.Distance (startPoint, endPoint);
+            if (distance >= maxDistance) maxDistance = distance = maxDistance;
+
+            if (distance <= minDistance) distance = minDistance;
+
             direction = (startPoint - endPoint).normalized;
             force = direction * distance * pushForce;
             
@@ -82,10 +93,11 @@ namespace Internal.Bow.CodeBase
 
         private void OnDragEnd ()
         {
+            arrow.transform.SetParent(null);
             //push the ball
             arrow.ActivateRigidBody();
 
-            arrow.Push (force);
+            arrow.Push(force);
 
             trajectory.Hide ();
         }
